@@ -10,7 +10,6 @@ class ShoppingResource:
 
     @staticmethod
     def _get_connection():
-
         conn = pymysql.connect(
             user='dbuser',
             password='dbuserdbuser',
@@ -21,8 +20,32 @@ class ShoppingResource:
         return conn
 
     @staticmethod
-    def get_by_cartid(key):
+    def _get_carts(limit, offset):
+        limit = min([limit, 80])
+        sql = "SELECT * FROM Cart.carts LIMIT %s OFFSET %s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (limit, offset))
+        result = cur.fetchall()
 
+        prev_page = 0 if offset == 0 else (offset - limit)
+        obj = {'data': result, 'link': [{'previous': '/carts' + '?offset=%d&limit=%d' % (prev_page, limit),
+                                         'next': '/carts' + '?offset=%d&limit=%d' % (offset + limit, limit)}]}
+
+        return obj
+
+    @staticmethod
+    def _create_cart(user_id, cart_id):
+        sql = "INSERT INTO Cart.carts(user_id, cart_id) VALUES(%s, %s)"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (user_id, cart_id))
+        conn.commit()
+
+        return {'user_id': user_id, 'cart_id': cart_id}
+
+    @staticmethod
+    def _get_by_cartid(key):
         sql = "SELECT * FROM Cart.carts WHERE Cart.carts.cart_id =%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
@@ -32,8 +55,7 @@ class ShoppingResource:
         return result
 
     @staticmethod
-    def get_itemids_by_cart(key):
-
+    def _get_itemids_by_cartid(key):
         sql = "SELECT item_id FROM Cart.cart_item WHERE cart_id = %s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
@@ -43,8 +65,7 @@ class ShoppingResource:
         return result
 
     @staticmethod
-    def get_itemnames_by_cart(key):
-
+    def _get_itemnames_by_cartid(key):
         sql = "SELECT item_name FROM Cart.cart_item, Cart.items WHERE cart_id = %s AND Cart.cart_item.item_id = Cart.items.item_id"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
@@ -54,8 +75,7 @@ class ShoppingResource:
         return result
 
     @staticmethod
-    def get_items_by_cart(key):
-
+    def _get_items_by_cartid(key):
         sql = "SELECT i.item_id, i.item_name FROM Cart.cart_item AS c, Cart.items AS i WHERE c.cart_id = %s AND c.item_id = i.item_id"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
@@ -65,61 +85,22 @@ class ShoppingResource:
         return result
 
     @staticmethod
-    def get_carts(size):
-        sql = "SELECT * FROM Cart.carts LIMIT %s"
+    def _get_items(limit, offset):
+        limit = min(limit, 80)
+        sql = "SELECT * FROM Cart.items LIMIT %s OFFSET %s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, args=size)
+        res = cur.execute(sql, (limit, offset))
         result = cur.fetchall()
 
-        l1 = []
-        for r in result:
-            l1.append(r)
+        prev_page = 0 if offset == 0 else (offset - limit)
+        obj = {'data': result, 'link': [{'previous': '/items' + '?offset=%d&limit=%d' % (prev_page, limit),
+                                         'next': '/items' + '?offset=%d&limit=%d' % (offset + limit, limit)}]}
 
-        return l1
-
-    @staticmethod
-    def get_items(size):
-
-        sql = "SELECT * FROM Cart.items LIMIT %s"
-        conn = ShoppingResource._get_connection()
-        cur = conn.cursor()
-        res = cur.execute(sql, args=size)
-        result = cur.fetchall()
-
-        return result
-
+        return obj
 
     @staticmethod
-    def get_by_item_id(key):
-
-        sql = "SELECT * FROM Cart.items WHERE Cart.items.item_id=%s"
-        conn = ShoppingResource._get_connection()
-        cur = conn.cursor()
-        res = cur.execute(sql, args=key)
-        result = cur.fetchone()
-
-        return result
-
-    @staticmethod
-    def get_by_item_name(name, size):
-
-        sql = "SELECT * FROM Cart.items WHERE Cart.items.item_name=%s LIMIT %s"
-        conn = ShoppingResource._get_connection()
-        cur = conn.cursor()
-        res = cur.execute(sql, (name, size))
-        result = cur.fetchall()
-
-        l1 = []
-        for r in result:
-            l1.append(r)
-
-        return l1
-
-
-    @staticmethod
-    def create_item(item_id, description, name):
-
+    def _create_item(item_id, description, name):
         sql = "INSERT INTO Cart.items(item_id, item_name, description) VALUES(%s, %s, %s)"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
@@ -129,11 +110,24 @@ class ShoppingResource:
         return {'item_id': item_id, 'item_name': name, 'description': description}
 
     @staticmethod
-    def create_cart(user_id, cart_id):
-        sql = "INSERT INTO Cart.carts(user_id, cart_id) VALUES(%s, %s)"
+    def _get_by_item_id(key):
+        sql = "SELECT * FROM Cart.items WHERE Cart.items.item_id=%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, (user_id, cart_id))
-        conn.commit()
+        res = cur.execute(sql, args=key)
+        result = cur.fetchone()
 
-        return {'user_id': user_id, 'cart_id': cart_id}
+        return result
+
+    @staticmethod
+    def _get_by_item_name(name, size):
+        sql = "SELECT * FROM Cart.items WHERE Cart.items.item_name=%s LIMIT %s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (name, size))
+        result = cur.fetchall()
+
+        return result
+
+
+
