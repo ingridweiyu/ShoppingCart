@@ -1,5 +1,5 @@
 # ShoppingCart
 
-This is the starter repository for Elastic Beanstalk Application for Introduction to Cloud (Applications)-1.
+This is the repository for Elastic Beanstalk Application for cart microservice.
 
 One of the microservice to manage carts and items for ecommerce application.
