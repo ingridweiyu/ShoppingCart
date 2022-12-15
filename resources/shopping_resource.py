@@ -29,8 +29,8 @@ class ShoppingResource:
         result = cur.fetchall()
 
         prev_page = 0 if offset == 0 else (offset - limit)
-        obj = {'data': result, 'link': [{'previous': '/carts' + '?offset=%d&limit=%d' % (prev_page, limit),
-                                         'next': '/carts' + '?offset=%d&limit=%d' % (offset + limit, limit)}]}
+        obj = {'data': result, 'link': [{'href': '/carts' + '?offset=%d&limit=%d' % (prev_page, limit), 'rel': 'previous'},
+                                        {'href': '/carts' + '?offset=%d&limit=%d' % (offset + limit, limit), 'rel': 'next'}]}
 
         return obj
 
@@ -94,8 +94,8 @@ class ShoppingResource:
         result = cur.fetchall()
 
         prev_page = 0 if offset == 0 else (offset - limit)
-        obj = {'data': result, 'link': [{'previous': '/items' + '?offset=%d&limit=%d' % (prev_page, limit),
-                                         'next': '/items' + '?offset=%d&limit=%d' % (offset + limit, limit)}]}
+        obj = {'data': result, 'link': [{'href': '/items' + '?offset=%d&limit=%d' % (prev_page, limit), 'rel': 'previous'},
+                                        {'href': '/items' + '?offset=%d&limit=%d' % (offset + limit, limit), 'rel': 'next'}]}
 
         return obj
 
