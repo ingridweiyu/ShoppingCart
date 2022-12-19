@@ -42,17 +42,78 @@ class ShoppingResource:
         res = cur.execute(sql, (user_id, cart_id))
         conn.commit()
 
-        return {'user_id': user_id, 'cart_id': cart_id}
+        return {'method': 'insert', 'user_id': user_id, 'cart_id': cart_id}
+
+    def _delete_cart(user_id, cart_id):
+        sql = "DELETE FROM Cart.carts WHERE user_id=%s AND cart_id=%s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (user_id, cart_id))
+        conn.commit()
+
+        return {'method': 'delete', 'user_id': user_id, 'cart_id': cart_id}
 
     @staticmethod
     def _get_by_cartid(key):
-        sql = "SELECT * FROM Cart.carts WHERE Cart.carts.cart_id =%s"
+        sql = "SELECT * FROM Cart.carts WHERE Cart.carts.cart_id=%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
         res = cur.execute(sql, args=key)
         result = cur.fetchone()
 
         return result
+
+    @staticmethod
+    def _insert_by_cartid(item_id, cart_id, count):
+        sql0 = "SELECT COUNT(*) AS c FROM Cart.cart_item WHERE item_id=%s AND cart_id=%s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql0, (item_id, cart_id))
+        result = cur.fetchone()
+        c = result["c"]
+
+        if c > 0:
+            return None
+
+        else:
+            sql = "INSERT INTO Cart.cart_item VALUES (%s, %s, %s)"
+            conn = ShoppingResource._get_connection()
+            cur = conn.cursor()
+            res = cur.execute(sql, (item_id, cart_id, count))
+            conn.commit()
+
+        return {"item_id": item_id, "cart_id": cart_id, "count": count}
+
+    def _update_by_cartid(item_id, cart_id, count):
+        sql = "UPDATE Cart.cart_item SET count=%s WHERE item_id=%s AND cart_id=%s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (count, item_id, cart_id))
+        conn.commit()
+
+        return {"item_id": item_id, "cart_id": cart_id, "count": count}
+
+    def _delete_by_cartid(item_id, cart_id):
+        sql0 = "SELECT item_id FROM Cart.cart_item WHERE cart_id=%s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql0, (cart_id))
+
+        itemid_lst = list()
+        for result in cur:
+            itemid_lst.append(result['item_id'])
+
+        if item_id in itemid_lst:
+            sql = "DELETE FROM Cart.cart_item WHERE item_id=%s AND cart_id=%s"
+            conn = ShoppingResource._get_connection()
+            cur = conn.cursor()
+            res = cur.execute(sql, (item_id, cart_id))
+            conn.commit()
+
+            return {"item_id": item_id, "cart_id": cart_id}
+
+        else:
+            return None
 
     @staticmethod
     def _get_itemids_by_cartid(key):
@@ -100,7 +161,7 @@ class ShoppingResource:
         return obj
 
     @staticmethod
-    def _create_item(item_id, description, name):
+    def _create_item(item_id, name, description):
         sql = "INSERT INTO Cart.items(item_id, item_name, description) VALUES(%s, %s, %s)"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()

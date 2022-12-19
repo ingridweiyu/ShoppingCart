@@ -14,7 +14,7 @@ def get_default():
     return rsp
 
 
-@application.route("/carts", methods=["GET", "POST"])
+@application.route("/carts", methods=["GET", "POST", "DELETE"])
 def get_all_carts():
     if request.method == "GET":
         limit = request.args.get('limit', 20)
@@ -28,30 +28,82 @@ def get_all_carts():
 
         return rsp
 
-    else:
+    elif request.method == "POST":
         request_json = request.get_json()
-        user_id = request_json.get('user_id')
-        cart_id = request_json.get('cart_id')
+        user_id = request_json['user_id']
+        cart_id = request_json['cart_id']
         result = ShoppingResource._create_cart(user_id, cart_id)
 
         if result:
             rsp = Response(json.dumps(result), status=200, content_type="application.json")
         else:
-            rsp = Response("CART NOT CREATED, BAD PARAMETER!", status=400, content_type="text/plain")
+            rsp = Response("CART NOT CREATED, BAD PARAMETER", status=400, content_type="text/plain")
+
+        return rsp
+
+    elif request.method == "DELETE":
+        request_json = request.get_json()
+        user_id = request_json['user_id']
+        cart_id = request_json['cart_id']
+        result = ShoppingResource._delete_cart(user_id, cart_id)
+
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type='application.json')
+        else:
+            rsp = Response("CART NOT DELETED, BAD PARAMETERS", status=400, content_type='text/plain')
 
         return rsp
 
 
-@application.route("/carts/<cart_id>", methods=["GET"])
-def get_carts_by_id(cart_id):
-    result = ShoppingResource._get_by_cartid(cart_id)
+@application.route("/carts/<cart_id>", methods=["GET", "POST", "PUT", "DELETE"])
+def get_by_cartid(cart_id):
+    if request.method == "GET":
+        result = ShoppingResource._get_by_cartid(cart_id)
 
-    if result:
-        rsp = Response(json.dumps(result), status=200, content_type="application.json")
-    else:
-        rsp = Response("NOT FOUND", status=404, content_type="text/plain")
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+        else:
+            rsp = Response("NOT FOUND", status=404, content_type="text/plain")
 
-    return rsp
+        return rsp
+
+    elif request.method == "POST":
+        request_json = request.get_json()
+        item_id = request_json["item_id"]
+        count = request_json["count"]
+        result = ShoppingResource._insert_by_cartid(item_id, cart_id, count)
+
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+        else:
+            rsp = Response("ITEM NOT ADDED TO CART, ITEM EXISTS IN THE CART, USE UPDATE METHOD INSTEAD", status=400, content_type="text/plain")
+
+        return rsp
+
+    elif request.method == "PUT":
+        request_json = request.get_json()
+        item_id = request_json["item_id"]
+        count = request_json["count"]
+        result = ShoppingResource._update_by_cartid(item_id, cart_id, count)
+
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+        else:
+            rsp = Response('ITEM IN CART NOT UPDATED', status=400, content_type="text/plain")
+
+        return rsp
+
+    elif request.method == "DELETE":
+        request_json = request.get_json()
+        item_id = request_json['item_id']
+        result = ShoppingResource._delete_by_cartid(item_id, cart_id)
+
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+        else:
+            rsp = Response('ITEM IN CART NOT DELETED, OR ITEM DOES NOT EXIST IN THE CART', status=400, content_type="text/plain")
+
+        return rsp
 
 
 @application.route("/carts/<cart_id>/item_ids", methods=["GET"])
@@ -144,5 +196,5 @@ def get_items_by_name(name):
 
 
 if __name__ == "__main__":
-    application.run(host="0.0.0.0", port=5020)
+    application.run(host="127.0.0.1", port=5020)
 
