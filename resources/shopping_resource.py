@@ -54,11 +54,11 @@ class ShoppingResource:
         return {'method': 'delete', 'user_id': user_id, 'cart_id': cart_id}
 
     @staticmethod
-    def _get_by_cartid(key):
+    def _get_by_cartid(cart_id):
         sql = "SELECT * FROM Cart.carts WHERE Cart.carts.cart_id=%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, args=key)
+        res = cur.execute(sql, (cart_id))
         result = cur.fetchone()
 
         return result
@@ -116,31 +116,31 @@ class ShoppingResource:
             return None
 
     @staticmethod
-    def _get_itemids_by_cartid(key):
+    def _get_itemids_by_cartid(cart_id):
         sql = "SELECT item_id FROM Cart.cart_item WHERE cart_id = %s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, args=key)
+        res = cur.execute(sql, (cart_id))
         result = cur.fetchall()
 
         return result
 
     @staticmethod
-    def _get_itemnames_by_cartid(key):
+    def _get_itemnames_by_cartid(cart_id):
         sql = "SELECT item_name FROM Cart.cart_item, Cart.items WHERE cart_id = %s AND Cart.cart_item.item_id = Cart.items.item_id"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, args=key)
+        res = cur.execute(sql, (cart_id))
         result = cur.fetchall()
 
         return result
 
     @staticmethod
-    def _get_items_by_cartid(key):
+    def _get_items_by_cartid(cart_id):
         sql = "SELECT i.item_id, i.item_name FROM Cart.cart_item AS c, Cart.items AS i WHERE c.cart_id = %s AND c.item_id = i.item_id"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, args=key)
+        res = cur.execute(sql, (cart_id))
         result = cur.fetchall()
 
         return result
@@ -171,11 +171,11 @@ class ShoppingResource:
         return {'item_id': item_id, 'item_name': name, 'description': description}
 
     @staticmethod
-    def _get_by_item_id(key):
+    def _get_by_item_id(item_id):
         sql = "SELECT * FROM Cart.items WHERE Cart.items.item_id=%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, args=key)
+        res = cur.execute(sql, (item_id))
         result = cur.fetchone()
 
         return result
