@@ -50,7 +50,7 @@ def get_all_carts():
         if result:
             rsp = Response(json.dumps(result), status=200, content_type='application.json')
         else:
-            rsp = Response("CART NOT DELETED, BAD PARAMETERS", status=400, content_type='text/plain')
+            rsp = Response("CART NOT DELETED, OR CART DOES NOT EXIST", status=400, content_type='text/plain')
 
         return rsp
 
@@ -76,7 +76,7 @@ def get_by_cartid(cart_id):
         if result:
             rsp = Response(json.dumps(result), status=200, content_type="application.json")
         else:
-            rsp = Response("ITEM NOT ADDED TO CART, ITEM EXISTS IN THE CART, USE UPDATE METHOD INSTEAD", status=400, content_type="text/plain")
+            rsp = Response("ITEM NOT ADDED TO CART, OR ITEM EXISTS IN THE CART, USE UPDATE METHOD INSTEAD", status=400, content_type="text/plain")
 
         return rsp
 

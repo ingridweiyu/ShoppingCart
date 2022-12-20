@@ -42,7 +42,7 @@ class ShoppingResource:
         res = cur.execute(sql, (user_id, cart_id))
         conn.commit()
 
-        return {'method': 'insert', 'user_id': user_id, 'cart_id': cart_id}
+        return {'user_id': user_id, 'cart_id': cart_id}
 
     def _delete_cart(user_id, cart_id):
         sql = "DELETE FROM Cart.carts WHERE user_id=%s AND cart_id=%s"
@@ -51,7 +51,7 @@ class ShoppingResource:
         res = cur.execute(sql, (user_id, cart_id))
         conn.commit()
 
-        return {'method': 'delete', 'user_id': user_id, 'cart_id': cart_id}
+        return {'user_id': user_id, 'cart_id': cart_id}
 
     @staticmethod
     def _get_by_cartid(cart_id):
@@ -60,8 +60,13 @@ class ShoppingResource:
         cur = conn.cursor()
         res = cur.execute(sql, (cart_id))
         result = cur.fetchone()
+        user_id = result["user_id"]
 
-        return result
+        link = [{"href": "/users/" + str(user_id), "rel": "user"}, {"href": "/contact/" + str(user_id) + "/email", "rel": "email"},
+                {"href": "/contacts/" + str(user_id) + "/address", "rel": "address"}]
+        obj = {"data": [result], "link": link}
+
+        return obj
 
     @staticmethod
     def _insert_by_cartid(item_id, cart_id, count):
