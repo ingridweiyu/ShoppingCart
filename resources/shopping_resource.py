@@ -200,13 +200,23 @@ class ShoppingResource:
 
     @staticmethod
     def _delete_by_itemid(item_id):
-        sql = "DELETE FROM Cart.items WHERE item_id=%s"
+        sql0 = "SELECT * FROM Cart.items WHERE item_id=%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, (item_id))
-        conn.commit()
+        res = cur.execute(sql0, (item_id))
+        result = cur.fetchone()
 
-        return {"item_id": item_id}
+        if result is not None:
+            sql = "DELETE FROM Cart.items WHERE item_id=%s"
+            conn = ShoppingResource._get_connection()
+            cur = conn.cursor()
+            res = cur.execute(sql, (item_id))
+            conn.commit()
+
+            return {"item_id": item_id}
+
+        else:
+            return None
 
     @staticmethod
     def _get_by_itemname(name, size):
