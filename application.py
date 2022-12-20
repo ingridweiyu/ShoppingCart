@@ -54,6 +54,16 @@ def get_all_carts():
 
         return rsp
 
+@application.route("/carts/users/<user_id>", methods=["GET"])
+def get_by_userid(user_id):
+    result = ShoppingResource._get_by_userid(user_id)
+
+    if result:
+        rsp = Response(json.dumps(result), status=200, content_type="application.json")
+    else:
+        rsp = Response("NOT FOUND", status=404, content_type="text/plain")
+
+    return rsp
 
 @application.route("/carts/<cart_id>", methods=["GET", "POST", "PUT", "DELETE"])
 def get_by_cartid(cart_id):

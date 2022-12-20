@@ -44,6 +44,7 @@ class ShoppingResource:
 
         return {'user_id': user_id, 'cart_id': cart_id}
 
+    @staticmethod
     def _delete_cart(user_id, cart_id):
         sql = "DELETE FROM Cart.carts WHERE user_id=%s AND cart_id=%s"
         conn = ShoppingResource._get_connection()
@@ -52,6 +53,16 @@ class ShoppingResource:
         conn.commit()
 
         return {'user_id': user_id, 'cart_id': cart_id}
+
+    @staticmethod
+    def _get_by_userid(user_id):
+        sql = "SELECT cart_id FROM Cart.carts WHERE user_id=%s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (user_id))
+        result = cur.fetchall()
+
+        return result
 
     @staticmethod
     def _get_by_cartid(cart_id):
@@ -89,6 +100,7 @@ class ShoppingResource:
 
         return {"item_id": item_id, "cart_id": cart_id, "count": count}
 
+    @staticmethod
     def _update_by_cartid(item_id, cart_id, count):
         sql = "UPDATE Cart.cart_item SET count=%s WHERE item_id=%s AND cart_id=%s"
         conn = ShoppingResource._get_connection()
@@ -98,6 +110,7 @@ class ShoppingResource:
 
         return {"item_id": item_id, "cart_id": cart_id, "count": count}
 
+    @staticmethod
     def _delete_by_cartid(item_id, cart_id):
         sql0 = "SELECT item_id FROM Cart.cart_item WHERE cart_id=%s"
         conn = ShoppingResource._get_connection()
