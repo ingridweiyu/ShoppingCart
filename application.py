@@ -171,32 +171,42 @@ def get_items():
         item_id = request_json.get('item_id')
         name = request_json.get('item_name')
         description = request_json.get('description')
-        result = ShoppingResource._create_item(item_id, description, name)
+        price = request_json.get('price')
+        result = ShoppingResource._create_item(item_id, name, description, price)
 
         if result:
             rsp = Response(json.dumps(result), status=200, content_type="application.json")
         else:
-            rsp = Response("ITEM NOT CREATED, BAD PARAMETER", status=400, content_type="text/plain")
+            rsp = Response("ITEM NOT CREATED, BAD PARAMETER", status=404, content_type="text/plain")
 
         return rsp
 
-
-@application.route("/items/<item_id>", methods=["GET"])
+@application.route("/items/<item_id>", methods=["GET", "DELETE"])
 def get_items_by_id(item_id):
-    result = ShoppingResource._get_by_item_id(item_id)
+    if request.method == "GET":
+        result = ShoppingResource._get_by_itemid(item_id)
 
-    if result:
-        rsp = Response(json.dumps(result), status=200, content_type="application.json")
-    else:
-        rsp = Response("NOT FOUND", status=404, content_type="text/plain")
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+        else:
+            rsp = Response("NOT FOUND", status=404, content_type="text/plain")
 
-    return rsp
+        return rsp
 
+    elif request.method == "DELETE":
+        result = ShoppingResource._delete_by_itemid(item_id)
+
+        if result:
+            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+        else:
+            rsp = Response("ITEM NOT DELETED", status=404, content_type="text/plain")
+
+        return rsp
 
 @application.route("/items_name/<name>", methods=["GET"])
 def get_items_by_name(name):
     size = request.args.get('size', 20)
-    result = ShoppingResource._get_by_item_name(name, size)
+    result = ShoppingResource._get_by_itemname(name, size)
     if result:
         rsp = Response(json.dumps(result), status=200, content_type="application.json")
     else:

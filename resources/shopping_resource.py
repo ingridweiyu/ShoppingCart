@@ -155,7 +155,7 @@ class ShoppingResource:
 
     @staticmethod
     def _get_items_by_cartid(cart_id):
-        sql = "SELECT i.item_id, i.item_name FROM Cart.cart_item AS c, Cart.items AS i WHERE c.cart_id = %s AND c.item_id = i.item_id"
+        sql = "SELECT i.item_id, i.item_name, c.count FROM Cart.cart_item AS c, Cart.items AS i WHERE c.cart_id = %s AND c.item_id = i.item_id"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
         res = cur.execute(sql, (cart_id))
@@ -179,17 +179,17 @@ class ShoppingResource:
         return obj
 
     @staticmethod
-    def _create_item(item_id, name, description):
-        sql = "INSERT INTO Cart.items(item_id, item_name, description) VALUES(%s, %s, %s)"
+    def _create_item(item_id, name, description, price):
+        sql = "INSERT INTO Cart.items(item_id, item_name, description, price) VALUES(%s, %s, %s, %s)"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
-        res = cur.execute(sql, (item_id, name, description))
+        res = cur.execute(sql, (item_id, name, description, price))
         conn.commit()
 
-        return {'item_id': item_id, 'item_name': name, 'description': description}
+        return {'item_id': item_id, 'item_name': name, 'description': description, "price": price}
 
     @staticmethod
-    def _get_by_item_id(item_id):
+    def _get_by_itemid(item_id):
         sql = "SELECT * FROM Cart.items WHERE Cart.items.item_id=%s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
@@ -199,7 +199,17 @@ class ShoppingResource:
         return result
 
     @staticmethod
-    def _get_by_item_name(name, size):
+    def _delete_by_itemid(item_id):
+        sql = "DELETE FROM Cart.items WHERE item_id=%s"
+        conn = ShoppingResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, (item_id))
+        conn.commit()
+
+        return {"item_id": item_id}
+
+    @staticmethod
+    def _get_by_itemname(name, size):
         sql = "SELECT * FROM Cart.items WHERE Cart.items.item_name=%s LIMIT %s"
         conn = ShoppingResource._get_connection()
         cur = conn.cursor()
